@@ -11,15 +11,13 @@ jobs:
       
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.0'  # 用你需要的版本
-          channel: 'stable'
+          channel: 'stable'  # 不指定版本，自动安装最新稳定版
 
       - name: Install dependencies
         run: |
           cd simple_live_app
           flutter pub get
 
-      # 关键改动：改为 --debug（不需要签名密钥）
       - name: Build Debug APK
         run: |
           cd simple_live_app
@@ -28,5 +26,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: simple-live-debug
+          name: simple-live-apk
           path: simple_live_app/build/app/outputs/flutter-apk/app-debug.apk
