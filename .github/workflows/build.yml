@@ -1,21 +1,17 @@
 name: Build APK
 
 on:
-  workflow_dispatch:  # 手动触发
-  push:
-    branches: [main, master]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: actions/checkout@v4
+      
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.x'
+          flutter-version: '3.38.0'  # 用你需要的版本
           channel: 'stable'
 
       - name: Install dependencies
@@ -23,13 +19,14 @@ jobs:
           cd simple_live_app
           flutter pub get
 
-      - name: Build APK
+      # 关键改动：改为 --debug（不需要签名密钥）
+      - name: Build Debug APK
         run: |
           cd simple_live_app
-          flutter build apk --release
+          flutter build apk --debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: simple-live-apk
-          path: simple_live_app/build/app/outputs/flutter-apk/app-release.apk
+          name: simple-live-debug
+          path: simple_live_app/build/app/outputs/flutter-apk/app-debug.apk
