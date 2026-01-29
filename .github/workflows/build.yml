@@ -22,9 +22,14 @@ jobs:
           echo "  intl: 0.19.0" >> pubspec.yaml
           rm -f pubspec.lock
 
-      - name: Fix build.gradle.kts
+      - name: Fix Android manifest and build config
         run: |
-          cd simple_live_app/android/app
+          cd simple_live_app/android/app/src/main
+          # 删除 AndroidManifest.xml 中的 package 属性（新版 AGP 不支持）
+          sed -i 's/ package="com.xycz.simple_live"//' AndroidManifest.xml
+          cat AndroidManifest.xml
+          
+          cd ../../
           cat > build.gradle.kts << 'EOF'
           plugins {
               id("com.android.application")
@@ -33,7 +38,7 @@ jobs:
           }
 
           android {
-              namespace = "com.xyaod.simple_live"
+              namespace = "com.xycz.simple_live"
               compileSdk = flutter.compileSdkVersion
               ndkVersion = flutter.ndkVersion
 
@@ -47,7 +52,7 @@ jobs:
               }
 
               defaultConfig {
-                  applicationId = "com.xyaod.simple_live"
+                  applicationId = "com.xycz.simple_live"
                   minSdk = flutter.minSdkVersion
                   targetSdk = flutter.targetSdkVersion
                   versionCode = 1
