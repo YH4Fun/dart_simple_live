@@ -11,8 +11,24 @@ jobs:
       
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.3'  # 与项目兼容的版本
-          channel: 'stable'
+          channel: 'stable'  # 使用最新稳定版即可
+
+      - name: Fix dependency conflict
+        run: |
+          cd simple_live_app
+          
+          # 1. 修改 intl 版本为 0.19.0（与 Flutter SDK 兼容）
+          sed -i 's/intl: \^0\.[0-9.]\+/intl: 0.19.0/g' pubspec.yaml
+          
+          # 2. 添加 dependency_overrides 强制覆盖（双保险）
+          if ! grep -q "dependency_overrides:" pubspec.yaml; then
+            echo "" >> pubspec.yaml
+            echo "dependency_overrides:" >> pubspec.yaml
+            echo "  intl: 0.19.0" >> pubspec.yaml
+          fi
+          
+          echo "=== 修改后的 pubspec.yaml 相关行 ==="
+          grep -n "intl:" pubspec.yaml
 
       - name: Install dependencies
         run: |
