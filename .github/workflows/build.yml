@@ -20,15 +20,55 @@ jobs:
           echo "" >> pubspec.yaml
           echo "dependency_overrides:" >> pubspec.yaml
           echo "  intl: 0.19.0" >> pubspec.yaml
+          rm -f pubspec.lock
 
-      - name: Setup local.properties
+      - name: Fix build.gradle.kts
         run: |
-          cd simple_live_app/android
-          # 关键：生成 local.properties 并提供所有必要值
-          echo "sdk.dir=/usr/local/lib/android/sdk" > local.properties
-          echo "flutter.sdk=${{ env.FLUTTER_ROOT }}" >> local.properties
-          echo "flutter.versionName=1.0.0" >> local.properties
-          echo "flutter.versionCode=1" >> local.properties
+          cd simple_live_app/android/app
+          cat > build.gradle.kts << 'EOF'
+          plugins {
+              id("com.android.application")
+              id("kotlin-android")
+              id("dev.flutter.flutter-gradle-plugin")
+          }
+
+          android {
+              namespace = "com.xyaod.simple_live"
+              compileSdk = flutter.compileSdkVersion
+              ndkVersion = flutter.ndkVersion
+
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_1_8
+                  targetCompatibility = JavaVersion.VERSION_1_8
+              }
+
+              kotlinOptions {
+                  jvmTarget = JavaVersion.VERSION_1_8.toString()
+              }
+
+              defaultConfig {
+                  applicationId = "com.xyaod.simple_live"
+                  minSdk = flutter.minSdkVersion
+                  targetSdk = flutter.targetSdkVersion
+                  versionCode = 1
+                  versionName = "1.0.0"
+              }
+
+              buildTypes {
+                  release {
+                      signingConfig = signingConfigs.getByName("debug")
+                  }
+              }
+          }
+
+          flutter {
+              source = "../.."
+          }
+
+          dependencies {
+              implementation("com.google.android.material:material:1.9.0")
+          }
+          EOF
 
       - name: Install dependencies
         run: |
@@ -38,8 +78,7 @@ jobs:
       - name: Build Debug APK
         run: |
           cd simple_live_app
-          # 显式传入 build-name 和 build-number 避免读取 null
-          flutter build apk --debug --build-name=1.0.0 --build-number=1
+          flutter build apk --debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
