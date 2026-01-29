@@ -9,23 +9,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # 使用与项目兼容的 Flutter 3.22.3（支持 intl 0.18.1）
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.3'
+          flutter-version: '3.22.3'  # 与项目兼容的版本
           channel: 'stable'
 
-      # 使用 --no-pub 后手动获取依赖，避免自动升级
       - name: Install dependencies
         run: |
           cd simple_live_app
-          rm -f pubspec.lock
-          flutter pub get --no-pub
+          flutter pub get
 
       - name: Build Debug APK
         run: |
           cd simple_live_app
-          flutter build apk --debug --no-pub
+          flutter build apk --debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
