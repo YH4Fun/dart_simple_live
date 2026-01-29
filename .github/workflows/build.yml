@@ -11,24 +11,24 @@ jobs:
       
       - uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'  # 使用最新稳定版即可
+          channel: 'stable'
 
-      - name: Fix dependency conflict
+      - name: Fix dependencies conflict
         run: |
           cd simple_live_app
-          
-          # 1. 修改 intl 版本为 0.19.0（与 Flutter SDK 兼容）
           sed -i 's/intl: \^0\.[0-9.]\+/intl: 0.19.0/g' pubspec.yaml
-          
-          # 2. 添加 dependency_overrides 强制覆盖（双保险）
-          if ! grep -q "dependency_overrides:" pubspec.yaml; then
-            echo "" >> pubspec.yaml
-            echo "dependency_overrides:" >> pubspec.yaml
-            echo "  intl: 0.19.0" >> pubspec.yaml
-          fi
-          
-          echo "=== 修改后的 pubspec.yaml 相关行 ==="
-          grep -n "intl:" pubspec.yaml
+          echo "" >> pubspec.yaml
+          echo "dependency_overrides:" >> pubspec.yaml
+          echo "  intl: 0.19.0" >> pubspec.yaml
+
+      - name: Setup local.properties
+        run: |
+          cd simple_live_app/android
+          # 关键：生成 local.properties 并提供所有必要值
+          echo "sdk.dir=/usr/local/lib/android/sdk" > local.properties
+          echo "flutter.sdk=${{ env.FLUTTER_ROOT }}" >> local.properties
+          echo "flutter.versionName=1.0.0" >> local.properties
+          echo "flutter.versionCode=1" >> local.properties
 
       - name: Install dependencies
         run: |
@@ -38,7 +38,8 @@ jobs:
       - name: Build Debug APK
         run: |
           cd simple_live_app
-          flutter build apk --debug
+          # 显式传入 build-name 和 build-number 避免读取 null
+          flutter build apk --debug --build-name=1.0.0 --build-number=1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
