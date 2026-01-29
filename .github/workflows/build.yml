@@ -9,9 +9,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      # 使用与该项目兼容的 Flutter 版本
       - uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'  # 不指定版本，自动安装最新稳定版
+          flutter-version: '3.19.6'
+          channel: 'stable'
+
+      # 创建 local.properties 避免 null 错误
+      - name: Setup Android environment
+        run: |
+          cd simple_live_app/android
+          echo "flutter.versionName=1.0.0" >> local.properties
+          echo "flutter.versionCode=1" >> local.properties
 
       - name: Install dependencies
         run: |
